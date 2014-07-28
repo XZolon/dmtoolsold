@@ -30,14 +30,13 @@ import javafx.stage.Stage;
 
 /**
  * @author Christopher Stewart (ZolonGames Software Development)
- * @version 0.3.1
+ * @version 0.4.0
  */
-public class ShopToolController extends Application
+public class DMToolsController extends Application
 {
-	//FXML Nodes
-//	@FXML private static TableView inventoryTable;
-//	@FXML private static TableColumn tableItemField;
-//	@FXML private static TableColumn tableCostField;
+	//FXML Nodes	
+	
+	//Shop Generator Tab
 	@FXML private static TextArea itemOutputWindow;
 	@FXML private static TextArea costOutputWindow;
 	@FXML private static TextField magicChance;
@@ -53,8 +52,25 @@ public class ShopToolController extends Application
 	@FXML private static RadioButton newShopRadio;
 	@FXML private static RadioButton existingShopRadio;
 	
+	// Time Control Tab
+	@FXML private static TextField dateField;
+	@FXML private static Button addSecond;
+	@FXML private static Button addRound;
+	@FXML private static Button addMinute;
+	@FXML private static Button addHour;
+	@FXML private static Button addLongRest;
+	@FXML private static Button addDay;
+	@FXML private static Button addWeek;
+	@FXML private static Button addMonth;
+	@FXML private static Button saveDate;
+	@FXML private static Button loadDate;
+	@FXML private static Button newDate;
+	
 	//Access Variables
 	protected static Stage mainStage;
+	protected static DMDate currDate;
+		
+	/***** Main Program Methods *****/
 	
 	public static void main(String[] args) 
 	{
@@ -63,30 +79,31 @@ public class ShopToolController extends Application
 		{
 			saveDir.mkdir();
 		}
+		currDate = new DMDate();
 		launch(args);
 	}
-
+	
 	@Override
 	public void start(Stage stage) throws Exception 
 	{
 		Parent root = FXMLLoader.load(getClass().getResource("mainLayout.fxml"));
 		addShopTypes();
 		addShopSizes();
-//		initializeShops();
-		//shops = new Shop[Data1e.shops.length];
 		// Set the stage to the fxml file
 		stage.setScene(new Scene(root));
 		mainStage = stage;
 		// Disable resizing the window
 		stage.setResizable(false);
-
 		// Set window title
-		stage.setTitle("D&D 1e Shop Tool");
+		stage.setTitle("D&D 1e Dungeon Master Tools");
 		// Show window
 		stage.show();
 		setShopPickerEvent();
+		updateDate();
 		
 	}
+	
+	/***** Shop Generator Methods *****/
 	
 	private void setShopPickerEvent() 
 	{
@@ -99,7 +116,7 @@ public class ShopToolController extends Application
 			}
 		});
 	}
-
+	
 	protected void refreshStockList(Shop currShop) 
 	{
 		itemOutputWindow.clear();
@@ -134,8 +151,6 @@ public class ShopToolController extends Application
 		shopTypePicker.setValue(Data1e.shopsTypes[7]);
 	}
 
-	
-	
 	private void generateStock() 
 	{
 		itemOutputWindow.clear();
@@ -267,7 +282,9 @@ public class ShopToolController extends Application
 			saveButton.setDisable(false);
 		}
 	}
-
+	
+	/***** Shop Generator Event Handlers *****/
+	
 	@FXML
 	public void generateShop(ActionEvent ae)
 	{
@@ -281,6 +298,7 @@ public class ShopToolController extends Application
 		}
 	}
 	
+	// DEPRECATED: REMOVE
 	@FXML
 	public void changeMagicCheck(ActionEvent ae)
 	{
@@ -371,5 +389,139 @@ public class ShopToolController extends Application
 			//
 		}
 		
+	}
+	/***** Time Control Methods *****/
+	
+	private void updateDate()
+	{
+		dateField.setText(currDate.getDateString());
+	}
+	
+	/***** Time Control Event Handlers *****/
+	
+	@FXML
+	public void addSecond (ActionEvent ae)
+	{
+		currDate.addSecond(1);
+		updateDate();
+	}
+	
+	@FXML
+	public void addRound (ActionEvent ae)
+	{
+		currDate.addSecond(6);
+		updateDate();
+	}
+	
+	@FXML
+	public void addMinute (ActionEvent ae)
+	{
+		currDate.addMinute(1);	
+		updateDate();
+	}
+	
+	@FXML
+	public void addHour (ActionEvent ae)
+	{
+		currDate.addHour(1);	
+		updateDate();
+	}
+	
+	@FXML
+	public void addLongRest (ActionEvent ae)
+	{
+		currDate.addHour(8);	
+		updateDate();
+	}
+	
+	@FXML
+	public void addDay (ActionEvent ae)
+	{
+		currDate.addDay(1);
+		updateDate();
+	}
+	
+	@FXML
+	public void addWeek (ActionEvent ae)
+	{
+		currDate.addDay(DMDate.DAYS_IN_WEEK);
+		updateDate();
+	}
+	
+	@FXML
+	public void addMonth (ActionEvent ae)
+	{
+		currDate.addMonth(1);
+		updateDate();
+	}
+	
+	@FXML
+	public void saveDate  (ActionEvent ae)
+	{
+		FileChooser newFile = new FileChooser();
+		newFile.setInitialDirectory(new File(System.getProperty("user.dir") + "/saves"));
+
+		newFile.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Date Files (.date)", "*.date"));
+		
+		File file = newFile.showSaveDialog(mainStage);
+		String path = file.getAbsolutePath();
+		
+		if (!path.contains(".date")) 
+		{
+			path += ".date";
+		}
+		
+		try 
+		{
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(
+					new File(path)));
+			out.writeObject(currDate);
+			out.close();
+		} catch (IOException e) 
+		{
+			//
+		}
+	}
+	
+	@FXML
+	public void loadDate(ActionEvent ae)
+	{
+		try {
+			FileChooser newFile = new FileChooser();
+			newFile.setInitialDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			newFile.getExtensionFilters().addAll(
+					new FileChooser.ExtensionFilter("Date Files (.date)",
+							"*.date")); 
+			File file = newFile.showOpenDialog(mainStage);
+			String path = file.getAbsolutePath();
+
+			if (!path.contains(".date")) 
+			{
+				JOptionPane.showMessageDialog(null, "Invalid File Type. Please load"
+						+ " a date file!");
+			}
+			else 
+			{
+				ObjectInputStream in = new ObjectInputStream(new FileInputStream(
+						new File(path)));
+				currDate = (DMDate) in.readObject();
+				updateDate();
+				in.close();
+			}
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	@FXML
+	public void newDate (ActionEvent ae)
+	{
+		currDate = new DMDate();
+		updateDate();
 	}
 }

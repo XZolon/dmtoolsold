@@ -1,10 +1,15 @@
 package dmtools;
+
+import java.io.Serializable;
+
 /**
  * @author Christopher Stewart (ZolonGames Software Development)
- * @version 0.3.1
+ * @version 0.4.0
  */
-public class DMDate
+public class DMDate implements Serializable
 {
+	
+	private static final long serialVersionUID = 1L;
 	public static final int DAYS_IN_WEEK = 6;
 	public static final String[] DAYS_OF_WEEK = {"Dawnrise", "Nooncrest", "Duskfall", "Nightfall", "Twilight", "Eventide"};
 	public static final int WEEKS_IN_MONTH = 5;
@@ -40,11 +45,45 @@ public class DMDate
 		String dateString = "";
 		
 		dateString = getDay() + ", day " + day + " of ";
-		dateString = dateString + MONTHS[month] + ", in the year " + year + "."; 
-		
+		dateString = dateString + MONTHS[month] + ", in the year " + year + ", "; 
+		dateString = dateString + "at " + getTime() + ".";
 		return dateString;
 	}
-
+	
+	private String getTime()
+	{
+		String hourString = "";
+		String minString = "";
+		String secString = "";
+		
+		if (hour < 10)
+		{
+			hourString = "0" + hour;
+		}
+		else
+		{
+			hourString = "" + hour;
+		}
+		if (min < 10)
+		{
+			minString = "0"+ min;
+		}
+		else
+		{
+			minString = "" + min;
+		}
+		if (sec < 10)
+		{
+			secString = "0" + sec;
+		}
+		else
+		{
+			secString = "" + sec;
+		}
+		
+		return hourString + ":" + minString + ":" + secString;
+	}
+	
 	private String getDay() 
 	{
 		String dayOfWeek = "";
@@ -94,7 +133,7 @@ public class DMDate
 		if ((min + amount) >= 60)
 		{
 			addHour(1);
-			sec = sec + amount - 60;
+			min = min + amount - 60;
 		}
 		else
 		{
@@ -130,7 +169,7 @@ public class DMDate
 
 	public void addMonth(int amount) 
 	{
-		if ((month + amount) > 12)
+		if ((month + amount) >= 12)
 		{
 			addYear(1);
 			month = month + amount - 12;
